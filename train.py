@@ -197,7 +197,7 @@ model.add(Bidirectional(LSTM(196, activation='relu'), input_shape=(n_steps, n_fe
 model.add(Dense(1))
 model.compile(optimizer='adam', loss='mse')
 # fit model
-H = model.fit(train_x, test_y, epochs=200, verbose=1, validation_data=(test_x, test_y))
+H = model.fit(train_x, train_y, epochs=200, verbose=1, validation_data=(test_x, test_y))
 model.save("predict.model")
 yhat = model.predict(test_x, verbose=0)
 rmse = math.sqrt(mean_squared_error(test_y, yhat))
