@@ -191,7 +191,7 @@ label_train = np.array(label_train)
 n_features = 5
 n_steps = 1
 X = data_train.reshape((data_train.shape[0], 1, n_features))
-train_x, test_x, train_y, test_y = train_test_split(X, label_train, 0.3, random_state=42)
+train_x, test_x, train_y, test_y = train_test_split(X, label_train, test_size=0.3, random_state=42)
 model = Sequential()
 model.add(Bidirectional(LSTM(196, activation='relu'), input_shape=(n_steps, n_features)))
 model.add(Dense(1))
