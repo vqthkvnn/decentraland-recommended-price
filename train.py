@@ -7,6 +7,12 @@ from keras import Sequential
 from keras.layers import Bidirectional, Dense, LSTM
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+
+def potential_indicator(avg_price_user, avg_price_guest):
+    "chỉ số tiềm năng"
+    return
 
 
 def avg_psi(parcels):
@@ -28,6 +34,7 @@ def belong_to_psi(point, parcels):
 
 
 def location_potential(point, estates):
+    "chỉ số tiềm năng ở vị trí"
     score = 0.0
     for value_ in estates.keys():
         x, y = avg_psi(estates[value_]["child"])
@@ -143,7 +150,7 @@ for idx, item in enumerate(json_array):
     dt["now_price"] = int(now_price)
     dt["cstn"] = cstn * 100
     if min_price_buy == 0:
-            dt["min_price_buy"] = int(now_price)
+        dt["min_price_buy"] = int(now_price)
     else:
         dt["min_price_buy"] = min_price_buy
 
@@ -173,7 +180,7 @@ for i in data_.keys():
             data_train.append(np.array(val))
             label_train.append(data_[i][j]["now_price"])
 print("Done convert data")
-# import pandas as pd
+import pandas as pd
 
 data_train = np.array(data_train)
 # pd.DataFrame(data_train).to_csv("file_2.csv")
@@ -184,21 +191,22 @@ label_train = np.array(label_train)
 n_features = 5
 n_steps = 1
 X = data_train.reshape((data_train.shape[0], 1, n_features))
+train_x, test_x, train_y, test_y = train_test_split(X, label_train, 0.3, random_state=42)
 model = Sequential()
 model.add(Bidirectional(LSTM(196, activation='relu'), input_shape=(n_steps, n_features)))
 model.add(Dense(1))
 model.compile(optimizer='adam', loss='mse')
 # fit model
-H = model.fit(X, label_train, epochs=200, verbose=1, validation_data=(X, label_train))
+H = model.fit(train_x, test_y, epochs=200, verbose=1, validation_data=(test_x, test_y))
 model.save("predict.model")
-yhat = model.predict(X, verbose=0)
-rmse = math.sqrt(mean_squared_error(label_train, yhat))
-print('Value RMSE: %.3f' % rmse)
+yhat = model.predict(test_x, verbose=0)
+rmse = math.sqrt(mean_squared_error(test_y, yhat))
+print('Test RMSE: %.3f' % rmse)
+plt.savefig("pred.png")
 plt.figure()
-plt.plot(label_train[10:30], color='red', label='now price')
-plt.plot(yhat[10:30], color='green', label='price predict')
-plt.plot(min_pl[10:30], color='yellow', label='min price')
+plt.plot(label_train[:15], color='red', label='now price')
+plt.plot(yhat[0:15], color='green', label='price predict')
+plt.plot(min_pl[0:15], color='yellow', label='min price')
 plt.xlabel("Number of sample")
 plt.ylabel("price (coin)/10")
 plt.show()
-plt.savefig("pred.png")
